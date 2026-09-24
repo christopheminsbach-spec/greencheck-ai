@@ -5,6 +5,7 @@ from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 from PIL import Image
 
+from app.diagnosis import DiagnosisResult
 from app.model import PlantModel
 
 
@@ -19,6 +20,7 @@ class PredictResponse(BaseModel):
     confidence: float
     model: str
     model_status: str
+    diagnosis: DiagnosisResult
 
 
 app = FastAPI(
@@ -37,7 +39,7 @@ def root():
     return {
         "service": "GreenCheck AI",
         "status": "ok",
-        "message": "FastAPI fonctionne"
+        "message": "FastAPI fonctionne",
     }
 
 
@@ -58,17 +60,25 @@ async def predict(file: UploadFile = File(...)):
 
     probabilities = torch.nn.functional.softmax(
         output,
-        dim=1
+        dim=1,
     )
 
     confidence, class_id = torch.max(
         probabilities,
-        dim=1
+        dim=1,
     )
 
     categories = plant_model.weights.meta["categories"]
 
     predicted_class = categories[class_id.item()]
+
+    diagnosis = DiagnosisResult(
+        status="model_not_specialized",
+        prediction=predicted_class,
+        confidence=round(confidence.item(), 4),
+        diagnosis="Classification ImageNet non spécialisée pour le diagnostic des plantes.",
+        recommendations=[],
+    )
 
     return {
         "success": True,
@@ -77,4 +87,5 @@ async def predict(file: UploadFile = File(...)):
         "confidence": round(confidence.item(), 4),
         "model": "MobileNetV3-Small",
         "model_status": "pretrained_imagenet",
+        "diagnosis": diagnosis,
     }

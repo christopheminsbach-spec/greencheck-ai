@@ -61,4 +61,6 @@ async def predict(file: UploadFile = File(...)):
         "filename": file.filename,
         "prediction": predicted_class,
         "confidence": round(confidence.item(), 4),
+        "model": "MobileNetV3-Small",
+        "model_status": "pretrained_imagenet",
     }

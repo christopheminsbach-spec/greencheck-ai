@@ -1,9 +1,9 @@
 from io import BytesIO
 
 import torch
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 from app.diagnosis import DiagnosisResult
 from app.model import PlantModel
@@ -52,9 +52,15 @@ async def predict(file: UploadFile = File(...)):
 
     image_data = await file.read()
 
-    image = Image.open(
-        BytesIO(image_data)
-    ).convert("RGB")
+    try:
+        image = Image.open(
+            BytesIO(image_data)
+        ).convert("RGB")
+    except UnidentifiedImageError:
+        raise HTTPException(
+            status_code=400,
+            detail="Le fichier envoyé n'est pas une image valide.",
+        )
 
     output = plant_model.predict(image)
 

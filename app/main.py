@@ -2,9 +2,23 @@ from io import BytesIO
 
 import torch
 from fastapi import FastAPI, File, UploadFile
+from pydantic import BaseModel
 from PIL import Image
 
 from app.model import PlantModel
+
+
+class PredictResponse(BaseModel):
+    """
+    Structure de réponse de l'endpoint de prédiction GreenCheck AI.
+    """
+
+    success: bool
+    filename: str
+    prediction: str
+    confidence: float
+    model: str
+    model_status: str
 
 
 app = FastAPI(
@@ -27,7 +41,7 @@ def root():
     }
 
 
-@app.post("/predict")
+@app.post("/predict", response_model=PredictResponse)
 async def predict(file: UploadFile = File(...)):
     """
     Analyse une image avec MobileNetV3-Small

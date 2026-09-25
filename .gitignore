@@ -2,3 +2,5 @@ datasets/
 __pycache__/
 *.py[cod]
 .DS_Store
+
+models/*.pth

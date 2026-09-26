@@ -5,7 +5,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from PIL import Image, UnidentifiedImageError
 
-from app.diagnosis import DiagnosisResult
+from app.diagnosis import DiagnosisResult, get_recommendations
 from app.model import PlantModel
 
 
@@ -81,7 +81,7 @@ async def predict(file: UploadFile = File(...)):
         prediction=predicted_class,
         confidence=round(confidence.item(), 4),
         diagnosis="Classification GreenCheck entraînée sur 7 classes de plantes.",
-        recommendations=[],
+        recommendations=get_recommendations(predicted_class),
     )
 
     return {

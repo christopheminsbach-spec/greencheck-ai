@@ -74,15 +74,13 @@ async def predict(file: UploadFile = File(...)):
         dim=1,
     )
 
-    categories = plant_model.weights.meta["categories"]
-
-    predicted_class = categories[class_id.item()]
+    predicted_class = plant_model.class_names[class_id.item()]
 
     diagnosis = DiagnosisResult(
-        status="model_not_specialized",
+        status="greencheck_trained",
         prediction=predicted_class,
         confidence=round(confidence.item(), 4),
-        diagnosis="Classification ImageNet non spécialisée pour le diagnostic des plantes.",
+        diagnosis="Classification GreenCheck entraînée sur 7 classes de plantes.",
         recommendations=[],
     )
 
@@ -92,6 +90,6 @@ async def predict(file: UploadFile = File(...)):
         "prediction": predicted_class,
         "confidence": round(confidence.item(), 4),
         "model": "MobileNetV3-Small",
-        "model_status": "pretrained_imagenet",
+        "model_status": "greencheck_trained",
         "diagnosis": diagnosis,
     }
